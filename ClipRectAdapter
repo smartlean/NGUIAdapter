@@ -1,0 +1,95 @@
+using UnityEngine;
+using UnityEngine;
+using System.Collections;
+
+/**
+ * 在这个面板设置标准分辨率 640*960 下各个东西的尺寸 
+ */
+[ExecuteInEditMode]
+public class ClipRectAdapter : MonoBehaviour
+{
+	[SerializeField][HideInInspector] float verticalPivot		= 1f;
+	[SerializeField][HideInInspector] UIPanel m_panel;
+	[SerializeField][HideInInspector] Vector2 m_panelSize;
+
+	[SerializeField][HideInInspector] BoxCollider m_boxCollider;
+	[SerializeField][HideInInspector] Vector2 m_colliderParam;
+
+	[SerializeField][HideInInspector] UIWidget m_clipPanelBkg;
+	[SerializeField][HideInInspector] int mClipPanelBkgHeight	= 400;
+
+	private Vector4 mPanelClip;
+	private Vector3 mColliderCenter;
+	private Vector3 mColliderSize;
+	
+	private static FightCamearFOV fov;
+	
+	void Start ()
+	{
+		if (m_panel != null) {
+			mPanelClip = new Vector4(
+				0,
+				m_panelSize.y * (0.5f - verticalPivot),
+				m_panelSize.x,
+				m_panelSize.y
+				);
+		}
+		if (m_boxCollider != null) {
+			mColliderSize.x = m_panelSize.x;
+			mColliderSize.y = m_panelSize.y;
+			mColliderSize.z = m_colliderParam.x;
+
+			mColliderCenter = new Vector3(0, mColliderSize.y * (0.5f - verticalPivot), m_colliderParam.y);
+		}
+		
+		if (fov == null) {
+			fov = NGUITools.FindInParents<FightCamearFOV>(gameObject);
+		}
+		
+		fixPanelClippingSize();
+	}
+
+	public UIPanel uiPanel { get { return m_panel; } }
+
+	#if UNITY_EDITOR
+	public void ReStart ()
+	{
+		this.Start();
+	}
+
+	void Update()
+	{
+		fixPanelClippingSize();
+	}
+	#endif
+	
+	private void fixPanelClippingSize()
+	{
+		if (fov == null) {
+			fov = NGUITools.FindInParents<FightCamearFOV>(gameObject);
+		}
+		float addHeight = fov.FixedScreenHeight - 960f;
+		addHeight = Mathf.Floor(addHeight);
+		
+		float halfAddHeight = addHeight * 0.5f;
+
+		if (m_panel != null) {
+			m_panel.baseClipRegion = new Vector4(
+				mPanelClip.x, 											// pivot x.
+				mPanelClip.y + halfAddHeight * (1 - 2 * verticalPivot) * 0.5f,	// pivot  y.
+				mPanelClip.z, 											// size x, (width).
+				mPanelClip.w * fov.OrthographicSize//+ addHeight * (1-Mathf.Abs(verticalPivot-0.5f))									// Size y, (height).
+				);
+		}
+		
+		if (m_boxCollider != null) {
+			m_boxCollider.center = new Vector3(mColliderCenter.x, mColliderCenter.y + halfAddHeight * (1 - 2 * verticalPivot), mColliderCenter.z);
+			m_boxCollider.size = new Vector3(mColliderSize.x, mColliderSize.y + addHeight, mColliderSize.z);
+		}
+		
+		if (m_clipPanelBkg != null) {
+			m_clipPanelBkg.height = Mathf.RoundToInt(mClipPanelBkgHeight * fov.OrthographicSize); //+ Mathf.CeilToInt(addHeight);
+		}
+	}
+}
+
