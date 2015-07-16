@@ -1,0 +1,112 @@
+using UnityEngine;
+using UnityEditor;
+using System.Collections;
+
+[CanEditMultipleObjects]
+[CustomEditor(typeof(ClipRectAdapter))]
+public class ClipRectAdapterInspector : Editor
+{
+	private ClipRectAdapter mTarget = null;
+	private SerializedProperty mPivot = null;
+
+	private void OnEnable ()
+	{
+		mTarget = target as ClipRectAdapter;
+		mPivot = serializedObject.FindProperty("verticalPivot");
+	}
+
+	public override void OnInspectorGUI ()
+	{
+		NGUIEditorTools.SetLabelWidth(80f);
+		EditorGUILayout.Space();
+
+		DrawCustomProperties();
+
+		if (serializedObject.ApplyModifiedProperties())
+			mTarget.ReStart();
+	}
+
+	protected void DrawCustomProperties ()
+	{
+		EditorGUILayout.Space();
+
+		EditorGUILayout.BeginHorizontal();
+		EditorGUILayout.LabelField("Relative Vertical Pivot", GUILayout.MinWidth(80));
+		Toggle("\u25B2", "ButtonLeft", 1f);
+		Toggle("\u258C", "ButtonMid", 0.5f);
+		Toggle("\u25BC", "ButtonRight", 0f);
+		EditorGUILayout.EndHorizontal();
+
+		EditorGUILayout.Space();
+
+		SerializedProperty spPanel = NGUIEditorTools.DrawProperty("ClipPanel", serializedObject, "m_panel", GUILayout.MinWidth(40f));
+		if (spPanel.objectReferenceValue != null) {
+			BeginContents();
+			SerializedProperty spt = serializedObject.FindProperty("m_panelSize");
+			Vector2 v2 = spt.vector2Value;
+			v2.x = EditorGUILayout.FloatField("Width", v2.x, GUILayout.MinWidth(40f));
+			v2.y = EditorGUILayout.FloatField("Height", v2.y, GUILayout.MinWidth(40f));
+			spt.vector2Value = v2;
+			EndContents();
+		}
+
+		EditorGUILayout.Space();
+
+		SerializedProperty spCol = NGUIEditorTools.DrawProperty("BoxCollider", serializedObject, "m_boxCollider", GUILayout.MinWidth(40f));
+		if (spCol.objectReferenceValue != null) {
+			BeginContents();
+			SerializedProperty sp3 = serializedObject.FindProperty("m_colliderParam");
+			Vector2 v2 = sp3.vector2Value;
+			v2.x = EditorGUILayout.FloatField("Size-Z", v2.x, GUILayout.MinWidth(40f));
+			v2.y = EditorGUILayout.FloatField("Z-Axis", v2.y, GUILayout.MinWidth(40f));
+			sp3.vector2Value = v2;
+			EndContents();
+		}
+
+		EditorGUILayout.Space();
+
+		SerializedProperty spWidget = NGUIEditorTools.DrawProperty("BkgWidget", serializedObject, "m_clipPanelBkg", GUILayout.MinWidth(40f));
+		if (spWidget.objectReferenceValue != null) {
+			BeginContents();
+			NGUIEditorTools.DrawProperty("Height", serializedObject, "mClipPanelBkgHeight", GUILayout.MinWidth(40f));
+			EndContents();
+		}
+	}
+
+	void Toggle (string text, string style, float value)
+	{
+		bool isActive = value == mPivot.floatValue;
+		
+		if (GUILayout.Toggle(isActive, text, style, GUILayout.MaxWidth(40f)) != isActive)
+			mPivot.floatValue = value;
+	}
+
+	static public void BeginContents ()
+	{
+		BeginContents(80f, 4f);
+	}
+
+	static public void BeginContents (float leftSpace, float viticalSpace)
+	{
+		GUILayout.BeginHorizontal();
+		GUILayout.Space(leftSpace);
+		EditorGUILayout.BeginHorizontal("AS TextArea", GUILayout.MinHeight(10f));
+		GUILayout.BeginVertical();
+		GUILayout.Space(viticalSpace);
+	}
+	
+	static public void EndContents ()
+	{
+		EndContents(4f);
+	}
+
+	static public void EndContents (float value)
+	{
+		GUILayout.Space(value);
+		GUILayout.EndVertical();
+		EditorGUILayout.EndHorizontal();
+		GUILayout.Space(value);
+		GUILayout.EndHorizontal();
+		GUILayout.Space(value);
+	}
+}
