@@ -1,0 +1,60 @@
+using UnityEngine;
+using System.Collections;
+
+[ExecuteInEditMode]
+public class PanelAdapter : MonoBehaviour {
+
+	private const float screen_min = 960f;
+	private const float screen_max = 1136;
+
+	public float paddingTop960 = 0f;
+	public float paddingTop1136 = 40f;
+
+	public float paddingBottom960 = 0f;
+	public float paddingBottom1136 = 40f;
+
+	void Start () {
+		init();
+	}
+
+#if UNITY_EDITOR
+	void Update () {
+		init();
+	}
+#endif
+
+	public void init() {
+		FightCamearFOV fov = NGUITools.FindInParents<FightCamearFOV>(gameObject);
+		if (fov == null) {
+			Debug.LogError("no UIConfig found !!!");
+			return;
+		}
+		Transform top = transform.Find("Top");
+		Transform center = transform.Find("Center");
+		Transform bottom = transform.Find("Bottom");
+
+		float ratio = fov.PaddingV * 2f / (screen_max - screen_min);
+		float paddingTop = (paddingTop1136 - paddingTop960) * ratio + paddingTop960;
+		float paddingBottom = (paddingBottom1136 - paddingBottom960) * ratio + paddingBottom960;
+		float paddingCenter = (paddingBottom - paddingTop) * 0.5f;
+
+		if (top != null) {
+			Vector3 posTop = top.localPosition;
+			posTop.y = (float)fov.CanvasHeight + fov.PaddingV - paddingTop;
+			//LogManager.Log(LogManager.eLOGTYPE.LOGTYPE_ERROR, "fov.CanvasHeight: " + fov.CanvasHeight);
+			//LogManager.Log(LogManager.eLOGTYPE.LOGTYPE_ERROR, "fov.PaddingV: " + fov.PaddingV);
+			//LogManager.Log(LogManager.eLOGTYPE.LOGTYPE_ERROR, "paddingTop: " + paddingTop);
+			top.localPosition = posTop;
+		}
+		if (center != null) {
+			Vector3 posCenter = center.localPosition;
+			posCenter.y = (float)fov.CanvasHeight * 0.5f + paddingCenter;
+			center.localPosition = posCenter;
+		}
+		if (bottom != null) {
+			Vector3 posBottom = bottom.localPosition;
+			posBottom.y = paddingBottom - fov.PaddingV;
+			bottom.localPosition = posBottom;
+		}
+	}
+}
