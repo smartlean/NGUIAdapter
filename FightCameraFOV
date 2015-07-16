@@ -4,34 +4,30 @@ using System.Collections;
 [ExecuteInEditMode]
 public class FightCameraFOV : MonoBehaviour
 {
-	public float CanvasWidth = 640;
-	public float CanvasHeight = 960;
+    public float CanvasWidth = 640;
+    public float CanvasHeight = 960;
 
     public float addFov;
     private Camera m_Camera;
-	public float StartFOV;
+    public float StartFOV;
     public float ResizeFOV;
     // Use this for initialization
     private float StartX;
     private float StartY;
 
-	private float mFixedScreenWidth;
-	private float mFixedScreenHeight; 
+    private float mFixedScreenWidth;
+    private float mFixedScreenHeight; 
 
     void Start()
     {
         m_Camera = this.GetComponent<Camera>();
         //StartFOV = m_Camera.orthographicSize;
-		if (gameObject.GetComponent<UICamera> () != null) 
-		{
-			StartFOV = 1;
-		} 
-		else 
-		{
-			StartFOV = 9.35f;		
-		}
+    	if (gameObject.GetComponent<UICamera> () != null) 
+	{
+	     StartFOV = 1;
+	}
 
-		addFov = -0.02f;
+	addFov = -0.02f;
         AutoResize();
     }
 
@@ -42,10 +38,10 @@ public class FightCameraFOV : MonoBehaviour
 
     void AutoResize()
     {
-		if (m_Camera == null) 
-		{
-			m_Camera = this.GetComponent<Camera>();	
-		}
+    	if (m_Camera == null) 
+	{
+	    m_Camera = this.GetComponent<Camera>();	
+	}
 
         float w = (float)Screen.width;
         float h = (float)Screen.height;
@@ -55,7 +51,7 @@ public class FightCameraFOV : MonoBehaviour
         if (screenRatio < 2f / 3f)
         {
             // Fit horizontally
-			float scale = w / CanvasWidth;
+	    float scale = w / CanvasWidth;
             ResizeFOV = strangeFactor;
             m_Camera.orthographicSize = (1 + strangeFactor) * StartFOV-addFov;
 
@@ -63,14 +59,14 @@ public class FightCameraFOV : MonoBehaviour
         else
         {
             ResizeFOV = StartFOV;
-			m_Camera.orthographicSize = StartFOV;//-addFov;
+	    m_Camera.orthographicSize = StartFOV;//-addFov;
         }
 
-		mFixedScreenHeight = m_Camera.orthographicSize * CanvasHeight;
-		mFixedScreenWidth = screenRatio * mFixedScreenHeight;
+	mFixedScreenHeight = m_Camera.orthographicSize * CanvasHeight;
+	mFixedScreenWidth = screenRatio * mFixedScreenHeight;
 
-		//LogManager.Log(LogManager.eLOGTYPE.LOGTYPE_ERROR, "screen size : " + Screen.width + "*" + Screen.height);
-		//LogManager.Log(LogManager.eLOGTYPE.LOGTYPE_ERROR, "fixed screen size : " + mFixedScreenWidth + "*" + mFixedScreenHeight);
+	//LogManager.Log(LogManager.eLOGTYPE.LOGTYPE_ERROR, "screen size : " + Screen.width + "*" + Screen.height);
+	//LogManager.Log(LogManager.eLOGTYPE.LOGTYPE_ERROR, "fixed screen size : " + mFixedScreenWidth + "*" + mFixedScreenHeight);
     }
 
 	public float FixedScreenHeight 
